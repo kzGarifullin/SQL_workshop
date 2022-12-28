@@ -1,0 +1,644 @@
+SELECT name_student, result
+FROM student
+INNER JOIN attempt USING(student_id)
+WHERE 
+
+
+
+SELECT name_student, name_subject,()AS Интервал
+FROM student
+INNER JOIN attempt USING(student_id)
+INNER JOIN subject USING(subject_id)
+GROUP BY subject_id, student_id;
+
+
+SELECT subject_id, student_id,COUNT(attempt_id)
+FROM student
+INNER JOIN attempt USING(student_id)
+INNER JOIN subject USING(subject_id)
+GROUP BY subject_id, student_id
+HAVING COUNT(attempt_id)>1;
+
+
+
+
+
+SELECT *
+FROM question
+INNER JOIN testing USING(question_id)
+INNER JOIN answer USING(answer_id);
+
+
+
+
+
+
+SELECT name_student, name_subject, date_attempt
+FROM student
+INNER JOIN attempt USING(student_id)
+INNER JOIN subject USING(subject_id)
+ORDER BY name_student, date_attempt DESC;
+
+
+
+SELECT name_student, name_subject, date_attempt, ROUND(SUM(is_correct)/3*100,2)
+FROM student
+INNER JOIN attempt USING(student_id)
+INNER JOIN subject USING(subject_id)
+INNER JOIN question USING(subject_id)
+INNER JOIN answer USING(question_id)
+INNER JOIN testing ON answer.answer_id = testing.answer_id
+GROUP BY name_student, name_subject, date_attempt
+ORDER BY name_student, date_attempt DESC;
+
+SELECT name_student, name_subject, date_attempt,is_correct,testing.attempt_id
+FROM student
+INNER JOIN attempt USING(student_id)
+INNER JOIN subject USING(subject_id)
+INNER JOIN question USING(subject_id)
+INNER JOIN answer USING(question_id)
+INNER JOIN testing ON answer.answer_id = testing.answer_id 
+
+ORDER BY name_student, date_attempt DESC;
+
+
+SELECT name_student, name_subject, date_attempt,is_correct,testing.attempt_id
+FROM student
+INNER JOIN attempt ON attempt.student_id = student.student_id
+INNER JOIN subject ON subject.subject_id = attempt.subject_id
+INNER JOIN question ON question.subject_id = subject.subject_id
+INNER JOIN answer ON answer.question_id = question.question_id
+INNER JOIN testing ON answer.answer_id = testing.answer_id 
+
+ORDER BY name_student, date_attempt DESC;
+SELECT* FROM testing;
+
+
+
+
+inner  join testing ON
+testing.attempt_id = attempt.attempt_id
+
+SELECT name_subject, CONCAT(LEFT(name_question,30),"..."), SUM(is_correct)
+FROM subject
+INNER JOIN question ON question.subject_id = subject.subject_id
+INNER JOIN answer ON answer.question_id=question.question_id
+INNER JOIN testing ON answer.answer_id=testing.answer_id
+GROUP BY name_question, name_subject;
+
+
+
+
+
+
+
+
+
+
+
+select * from attempt;
+
+SELECT attempt_id FROM attempt WHERE date_attempt=(SELECT MAX(date_attempt) FROM attempt);
+
+
+INSERT INTO testing(attempt_id, question_id, answer_id)
+SELECT attempt_id, question_id, answer_id
+FROM attempt
+INNER JOIN question USING(subject_id)
+WHERE attempt_id = (SELECT MAX(attempt) FROM attempt) AND question_id
+
+
+WHERE name_student= "Баранов Павел" AND name_subject = "Основы баз данных";
+
+
+
+INSERT INTO attempt(student_id, subject_id, date_attempt, result)
+SELECT student_id, subject_id, date_attempt, result
+FROM testing
+INNER JOIN answer USING(answer_id)
+WHERE attempt_id = (SELECT MAX(attempt_id) FROM attempt)
+ORDER BY RAND() LIMIT 3;
+
+
+
+
+
+
+
+
+
+
+
+
+SELECT name_program
+FROM program_subject
+    INNER JOIN program USING(program_id)
+WHERE name_program NOT IN(
+SELECT
+)
+ORDER BY name_program;
+
+
+
+
+SELECT name_program, name_enrollee, () AS itog
+FROM enrollee
+    INNER JOIN program_enrollee USING(enrollee_id)
+    INNER JOIN program USING(program_id)
+    INNER JOIN program_subject USING(program_id)
+    INNER JOIN subject USING(subject_id)
+    INNER JOIN enrollee_subject USING(subject_id)
+    
+
+
+
+
+
+
+CREATE TABLE student AS
+SELECT  name_program, name_enrollee, itog
+FROM enrollee
+    INNER JOIN applicant_order USING(enrollee_id)
+    INNER JOIN program USING(program_id)
+GROUP BY name_program, name_enrollee
+ORDER BY name_program, itog DESC;
+SELECT* from student;
+
+
+SELECT step_name, keyword_name, INSTR(step_name, keyword_name) FROM step CROSS JOIN keyword
+WHERE INSTR(step_name, keyword_name)<>0
+
+
+SELECT step_name, keyword_name, INSTR(step_name, keyword_name) FROM step CROSS JOIN keyword
+WHERE REGEXP_INSTR(step_name, CONCAT('\\b', keyword_name, '\\b'));
+
+
+
+SELECT step_name
+FROM module
+    INNER JOIN lesson USING(module_id)
+    INNER JOIN step USING(lesson_id)
+    INNER JOIN step_keyword USING(step_id)
+    INNER JOIN keyword USING(keyword_id)
+WHERE keyword_name IN("AVG","MAX")  
+GROUP BY step_name
+HAVING count(keyword_name)=2;
+
+
+
+
+
+SELECT COUNT(DISTINCT step_id) AS общее_кол_во
+FROM step_student
+;
+
+    SELECT student_name, step_id, result, count(student_name)
+    FROM 
+        student
+        INNER JOIN step_student USING (student_id)
+    WHERE result = "correct"
+    GROUP BY student_name, step_id, result 
+    ORDER BY student_name;  
+
+
+
+
+WITH student_progress (student_name, progress) AS
+    (
+    SELECT student_name, count(DISTINCT step_id) AS progress
+    FROM student INNER JOIN step_student USING (student_id)
+    WHERE result = "correct"
+    GROUP BY student_name
+    )
+SELECT student_name, 
+    ROUND(progress / 32 * 100) AS Прогресс
+FROM  
+   student_progress
+   INNER JOIN student USING(student_name)
+        INNER JOIN step_student USING (student_id)
+
+
+
+
+
+WITH table (name, progress) 
+  AS (
+    SELECT student_name, count(DISTINCT step_id) AS progress
+    FROM student INNER JOIN step_student USING (student_id)
+    WHERE result = "correct"
+    GROUP BY student_name
+  )
+
+WITH get_count_correct (st_n_c, count_correct) 
+  AS (
+      SELECT step_name, count(*)
+      FROM 
+          step 
+          INNER JOIN step_student USING (step_id)
+      WHERE result = "correct"
+      GROUP BY step_name
+   ),
+  get_count_wrong (st_n_w, count_wrong) 
+  AS (
+    SELECT step_name, count(*)
+    FROM 
+        step 
+        INNER JOIN step_student USING (step_id)
+    WHERE result = "wrong"
+    GROUP BY step_name
+   )  
+SELECT st_n_c AS Шаг, 
+    ROUND(count_correct / (count_correct + count_wrong) * 100) AS Успешность
+FROM  
+    get_count_correct 
+    INNER JOIN get_count_wrong ON st_n_c = st_n_w
+
+
+
+
+
+
+
+SET @max := (SELECT COUNT(DISTINCT step_id) AS общее_кол_во
+             FROM step_student
+);
+
+
+    SELECT student_name, ROUND(ROUND(count(DISTINCT step_id)/@max,2)*100) AS progress
+    FROM student INNER JOIN step_student USING (student_id)
+    WHERE result = "correct"
+    GROUP BY student_name
+    ORDER BY 2 DESC, 1;
+
+
+
+
+
+SELECT student_id,step_id, SUM(submission_time-attempt_time)
+FROM module
+    INNER JOIN lesson USING(module_id)
+    INNER JOIN step USING(lesson_id)
+    INNER JOIN step_student USING(step_id)
+    WHERE submission_time-attempt_time<14400
+    GROUP BY  student_id, step_id
+    ;
+
+SELECT student_id, lesson_position, step_position, SUM(submission_time-attempt_time)
+FROM module
+    INNER JOIN lesson USING(module_id)
+    INNER JOIN step USING(lesson_id)
+    INNER JOIN step_student USING(step_id)
+    WHERE submission_time-attempt_time<14400
+    GROUP BY  student_id, lesson_position, step_position
+    ;
+
+
+
+
+
+SELECT student_id, lesson_position, SUM(submission_time-attempt_time)
+FROM module
+    INNER JOIN lesson USING(module_id)
+    INNER JOIN step USING(lesson_id)
+    INNER JOIN step_student USING(step_id)
+    WHERE submission_time-attempt_time<14400
+    GROUP BY  student_id, lesson_position
+    ;
+
+
+
+
+SELECT lesson_position,sum(time)/count(lesson_position)/3600
+FROM(
+SELECT student_id, lesson_position, SUM(submission_time-attempt_time) as time
+FROM module
+    INNER JOIN lesson USING(module_id)
+    INNER JOIN step USING(lesson_id)
+    INNER JOIN step_student USING(step_id)
+    WHERE submission_time-attempt_time<14400
+    GROUP BY  student_id, lesson_position) as dfg
+GROUP BY lesson_position;
+
+
+
+
+SELECT lesson_position, module_id, ROUND(sum(time)/count(time)/3600,2) AS Среднее_время
+FROM(
+SELECT module_id,student_id, lesson_position, SUM(submission_time-attempt_time) as time
+FROM module
+    INNER JOIN lesson USING(module_id)
+    INNER JOIN step USING(lesson_id)
+    INNER JOIN step_student USING(step_id)
+    WHERE submission_time-attempt_time<14400
+    GROUP BY  student_id, lesson_position,module_id) as dfg
+GROUP BY lesson_position,module_id;
+
+
+
+
+
+SELECT CONCAT(module_id,".",lesson_position," ",CONCAT(LEFT(lesson_name,12),"...")) AS Урок         
+FROM module
+    INNER JOIN lesson USING(module_id)
+    INNER JOIN step USING(lesson_id)
+WHERE lesson_position, module_id = (SELECT lesson_position, module_id
+FROM(
+SELECT module_id,student_id, lesson_position, SUM(submission_time-attempt_time) as time
+FROM module
+    INNER JOIN lesson USING(module_id)
+    INNER JOIN step USING(lesson_id)
+    INNER JOIN step_student USING(step_id)
+    WHERE submission_time-attempt_time<14400
+    GROUP BY  student_id, lesson_position,module_id) as dfg
+GROUP BY lesson_position,module_id)
+ORDER BY module_id,lesson_position,step_position;
+
+
+
+SELECT DISTINCT Урок FROM( 
+SELECT  CONCAT(module_id,".",lesson_position," ",CONCAT(LEFT(lesson_name,12),"...")) AS Урок         
+FROM module
+    INNER JOIN lesson USING(module_id)
+    INNER JOIN step USING(lesson_id)
+WHERE lesson_position IN (SELECT lesson_position
+FROM(
+SELECT module_id,student_id, lesson_position, SUM(submission_time-attempt_time) as time
+FROM module
+    INNER JOIN lesson USING(module_id)
+    INNER JOIN step USING(lesson_id)
+    INNER JOIN step_student USING(step_id)
+    WHERE submission_time-attempt_time<14400
+    GROUP BY  student_id, lesson_position,module_id) as dfg
+GROUP BY lesson_position,module_id)
+AND module_id IN (SELECT module_id
+FROM(
+SELECT module_id,student_id, lesson_position, SUM(submission_time-attempt_time) as time
+FROM module
+    INNER JOIN lesson USING(module_id)
+    INNER JOIN step USING(lesson_id)
+    INNER JOIN step_student USING(step_id)
+    WHERE submission_time-attempt_time<14400
+    GROUP BY  student_id, lesson_position,module_id) as dfg
+GROUP BY lesson_position,module_id)
+ORDER BY module_id,lesson_position,step_position)sd;
+
+
+
+
+
+
+
+
+
+
+
+WITH get_rate_lesson(stud, les, ttime) 
+AS
+(
+   SELECT student_name, CONCAT(module_id,'.', lesson_position), submission_time
+   FROM student INNER JOIN step_student USING(student_id)
+                INNER JOIN step USING (step_id)
+                INNER JOIN lesson USING (lesson_id)
+   WHERE result = "correct"
+   GROUP BY module_id, student_name, submission_time
+)
+SELECT stud AS Студент, les as Урок, ttime as Макс_время_отправки 
+FROM get_rate_lesson 
+
+
+
+SELECT student_name,  FROM_UNIXTIME(submission_time)
+   FROM student INNER JOIN step_student USING(student_id)
+                INNER JOIN step USING (step_id)
+                INNER JOIN lesson USING (lesson_id)
+   WHERE result = "correct"
+   GROUP BY student_name, submission_time;
+
+
+
+SELECT  student_name AS Студент, CONCAT(module_id,'.', lesson_position) AS r, result AS Результат, FROM_UNIXTIME(submission_time) AS Дата_отправки
+FROM student
+    INNER JOIN step_student USING(student_id)
+    INNER JOIN step USING(step_id)
+    INNER JOIN lesson USING (lesson_id)
+WHERE result="correct" AND student_name="student_15"
+ORDER BY Дата_отправки;
+
+
+1)SELECT  student_name AS Студент, CONCAT(module_id,'.', lesson_position) AS Урок, MAX(FROM_UNIXTIME(submission_time)) AS Дата_отправки
+FROM student
+    INNER JOIN step_student USING(student_id)
+    INNER JOIN step USING(step_id)
+    INNER JOIN lesson USING (lesson_id)
+WHERE result="correct" 
+GROUP BY student_name, CONCAT(module_id,'.', lesson_position)
+ORDER BY Дата_отправки;
+
+
+
+
+
+
+SELECT  student_name AS Студент, result, CONCAT(module_id,'.', lesson_position) AS Урок
+FROM student
+    INNER JOIN step_student USING(student_id)
+    INNER JOIN step USING(step_id)
+    INNER JOIN lesson USING (lesson_id)
+WHERE result="correct" 
+ORDER BY student_name
+
+
+;
+
+
+
+
+
+
+
+
+SELECT  student_name AS Студент, CONCAT(module_id,'.', lesson_position) AS Урок, MAX(FROM_UNIXTIME(submission_time)) AS Дата_отправки
+FROM student
+    INNER JOIN step_student USING(student_id)
+    INNER JOIN step USING(step_id)
+    INNER JOIN lesson USING (lesson_id)
+WHERE result="correct" 
+GROUP BY student_name, CONCAT(module_id,'.', lesson_position)
+ORDER BY Студент;
+   
+
+
+
+
+with get_time_lesson(name1, les1, dat1) 
+AS
+(
+    SELECT  student_name AS Студент, CONCAT(module_id,'.', lesson_position) AS Урок, MAX(FROM_UNIXTIME(submission_time)) AS Дата_отправки
+FROM student
+    INNER JOIN step_student USING(student_id)
+    INNER JOIN step USING(step_id)
+    INNER JOIN lesson USING (lesson_id)
+WHERE result="correct" 
+GROUP BY student_name, CONCAT(module_id,'.', lesson_position)
+ORDER BY Студент
+  ),
+get_student_three_lesson(name2)
+AS
+(SELECT name1
+ FROM get_time_lesson
+ GROUP BY name1
+ HAVING COUNT(name1)>2
+)
+SELECT name2
+FROM get_student_three_lesson;
+
+
+
+with get_time_lesson(name1, les1, dat1) 
+AS
+(
+    SELECT  student_name AS Студент, CONCAT(module_id,'.', lesson_position) AS Урок, MAX(FROM_UNIXTIME(submission_time)) AS Дата_отправки
+FROM student
+    INNER JOIN step_student USING(student_id)
+    INNER JOIN step USING(step_id)
+    INNER JOIN lesson USING (lesson_id)
+WHERE result="correct" 
+GROUP BY student_name, CONCAT(module_id,'.', lesson_position)
+ORDER BY Студент
+  ),
+get_student_three_lesson(name2)
+AS
+(SELECT name1
+ FROM get_time_lesson
+ GROUP BY name1
+ HAVING COUNT(name1)>2
+)
+SELECT name1, les1, dat1
+FROM get_time_lesson INNER JOIN get_student_three_lesson ON get_time_lesson.name1=get_student_three_lesson.name2
+;
+
+
+
+
+
+
+
+
+SELECT  student_name AS Студент, 
+CONCAT(module_id,".",lesson_position,".",step_position) AS Шаг,
+DENSE_RANK() OVER (PARTITION BY step_id ORDER BY submission_time) AS Номер_попытки,
+step_id,
+result AS Результат,
+SEC_TO_TIME(submission_time - attempt_time) AS Время_попытки
+FROM student
+    INNER JOIN step_student USING(student_id)
+    INNER JOIN step USING(step_id)
+    INNER JOIN lesson USING (lesson_id)
+WHERE student_name = "student_59"
+;
+
+
+SET @sred := (SELECT COUNT(DISTINCT step_id) AS общее_кол_во
+             FROM step_student
+);
+
+
+
+
+SET @sred := (
+WITH ttime(time) AS(
+SELECT  IF(submission_time - attempt_time<3600,(submission_time - attempt_time),0)
+FROM student
+    INNER JOIN step_student USING(student_id)
+    INNER JOIN step USING(step_id)
+    INNER JOIN lesson USING (lesson_id)
+WHERE student_name = "student_59")
+SELECT CEIL(AVG(time))
+FROM ttime
+WHERE time<>0);
+
+SELECT  student_name AS Студент, 
+CONCAT(module_id,".",lesson_position,".",step_position) AS Шаг,
+DENSE_RANK() OVER (PARTITION BY step_id ORDER BY submission_time) AS Номер_попытки,
+step_id,
+result AS Результат,
+IF(submission_time - attempt_time<3600,(submission_time - attempt_time),@sred) AS Время_попытки
+FROM student
+    INNER JOIN step_student USING(student_id)
+    INNER JOIN step USING(step_id)
+    INNER JOIN lesson USING (lesson_id)
+WHERE student_name = "student_59"
+;
+
+
+
+
+
+
+SET @sred := (
+WITH ttime(time) AS(
+SELECT  IF(submission_time - attempt_time<3600,(submission_time - attempt_time),0)
+FROM student
+    INNER JOIN step_student USING(student_id)
+    INNER JOIN step USING(step_id)
+    INNER JOIN lesson USING (lesson_id)
+WHERE student_name = "student_59")
+SELECT CEIL(AVG(time))
+FROM ttime
+WHERE time<>0);
+
+WITH ttable(Студент, Шаг, Номер_попытки, step_id, Результат, Время_попытки) AS(
+SELECT  student_name AS Студент, 
+CONCAT(module_id,".",lesson_position,".",step_position) AS Шаг,
+DENSE_RANK() OVER (PARTITION BY step_id ORDER BY submission_time) AS Номер_попытки,
+step_id,
+result AS Результат,
+IF(submission_time - attempt_time<3600,(submission_time - attempt_time),@sred) AS Время_попытки
+FROM student
+    INNER JOIN step_student USING(student_id)
+    INNER JOIN step USING(step_id)
+    INNER JOIN lesson USING (lesson_id)
+WHERE student_name = "student_59")
+SELECT Шаг,SUM(Время_попытки)
+FROM ttable 
+GROUP BY Шаг
+;
+
+
+
+
+
+
+
+CREATE TABLE db (
+  id              INT           NOT NULL    IDENTITY    PRIMARY KEY, 
+  Name VARCHAR(20)
+   
+);
+INSERT INTO db
+VALUES ('a'),
+('b'),('c'),('d'),('e'),('f'),('g'),('i'),('j');
+SELECT * from db;
+
+
+
+
+SELECT * FROM db
+WHERE (SELECT count(id)
+      FROM db)>20;
+
+
+
+
+WITH num_row
+AS
+(
+SELECT row_number() OVER (ORDER BY id) as nom , id, name
+FROM db
+)
+SELECT * FROM num_row
+WHERE nom BETWEEN (20) AND (SELECT count(id)
+      FROM db);
+
+
+
